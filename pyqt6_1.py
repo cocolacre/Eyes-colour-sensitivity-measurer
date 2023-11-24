@@ -2,7 +2,7 @@ import sys, os
 import time
 import random
 from PyQt6.QtCore import QUrl
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt6.QtGui import QPainter, QColor
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QKeySequence, QShortcut
@@ -67,7 +67,11 @@ class ColoredRectangleWidget(QWidget):
         self.color = QColor(255, 0, 0)  # Initial color is red
         self.colorR = QColor(255, 255, 0)  # 
         self.colorL = QColor(255, 0, 255)  # 
-        self.buttonsPane = QWidget()
+        self.buttonsPaneA = QWidget()
+        self.buttonsPaneB = QWidget()
+        self.buttonsPaneC = QWidget()
+        self.buttonsPaneMain = QWidget()
+        
         self.bigPane = QWidget()
         self.rectsWidget = QWidget()
         self.rectLeft = QWidget()
@@ -79,9 +83,86 @@ class ColoredRectangleWidget(QWidget):
         # Create a layout
         layoutBig = QVBoxLayout()
         layoutRects = QHBoxLayout()
-        layoutButtons = QHBoxLayout()
+        
+        layoutButtonsMain = QVBoxLayout()
+        layoutButtonsA = QHBoxLayout()
+        layoutButtonsB = QHBoxLayout()
+        layoutConfigsA = QHBoxLayout()
+    
+    
+        #labels
+        # min_delta_red, min_delta_green, min_delta_blue  
+        # max_delta_red, max_delta_green, max_delta_blue  
+        # min_delta_h, min_delta_l, min_delta_s 
+        # max_delta_h, max_delta_l, max_delta_s 
+        # min_h, max_h, min_l, max_l, min_s, max_s
+        self.RGBSettingsLabels = QHBoxLayout() #LAYOUT RGB labels
+        self.RGBSettingsEdits = QHBoxLayout() #LAYOUT RGB edits
+        self.LabelMinDeltaRed = QLabel("min delta R")
+        self.LabelMinDeltaGreen = QLabel("min delta G")
+        self.LabelMinDeltaBlue = QLabel("min delta B")
+        self.MinDeltaRedEdit = QLineEdit("0")
+        self.MinDeltaGreenEdit = QLineEdit("0")
+        self.MinDeltaBlueEdit = QLineEdit("0")
+        
+        self.LabelMaxDeltaRed = QLabel("max delta R")
+        self.LabelMaxDeltaGreen = QLabel("max delta G")
+        self.LabelMaxDeltaBlue = QLabel("max delta B")
+        self.MaxDeltaRedEdit = QLineEdit("0")
+        self.MaxDeltaGreenEdit = QLineEdit("0")
+        self.MaxDeltaBlueEdit = QLineEdit("0")
+
+        self.RGBSettingsLabels.addWidget(self.LabelMinDeltaRed)
+        self.RGBSettingsLabels.addWidget(self.LabelMaxDeltaRed)
+        self.RGBSettingsLabels.addWidget(self.LabelMinDeltaGreen)
+        self.RGBSettingsLabels.addWidget(self.LabelMaxDeltaGreen)
+        self.RGBSettingsLabels.addWidget(self.LabelMinDeltaBlue)
+        self.RGBSettingsLabels.addWidget(self.LabelMaxDeltaBlue)
+        
+        self.RGBSettingsEdits.addWidget(self.MinDeltaRedEdit)
+        self.RGBSettingsEdits.addWidget(self.MaxDeltaRedEdit)
+        self.RGBSettingsEdits.addWidget(self.MinDeltaGreenEdit)
+        self.RGBSettingsEdits.addWidget(self.MaxDeltaGreenEdit)
+        self.RGBSettingsEdits.addWidget(self.MinDeltaBlueEdit)
+        self.RGBSettingsEdits.addWidget(self.MaxDeltaBlueEdit)
 
 
+        
+        
+        self.HLSSettingsDeltasLabels = QHBoxLayout() #LAYOUT HSL deltas labels
+        self.HLSSettingsDeltasEdits = QHBoxLayout() #LAYOUT HSL deltas edits
+        self.LabelMinDeltaHue = QLabel("min delta H")
+        self.LabelMinDeltaLightness = QLabel("min delta L")
+        self.LabelMinDeltaSaturation = QLabel("min delta S")
+        self.MinDeltaHueEdit = QLineEdit("0")
+        self.MinDeltaLightnessEdit = QLineEdit("0")
+        self.MinDeltaSaturationEdit = QLineEdit("0")
+        
+        self.LabelMaxDeltaHue = QLabel("max delta H")
+        self.LabelMaxDeltaSaturation = QLabel("max delta S")
+        self.LabelMaxDeltaLightness = QLabel("max delta L")
+        self.MaxDeltaHueEdit = QLineEdit("0")
+        self.MaxDeltaSaturationEdit = QLineEdit("0")
+        self.MaxDeltaLightnessEdit = QLineEdit("0")
+        
+
+        self.HLSSettingsMinMaxLabels = QHBoxLayout() #LAYOUT min-max HSL labels
+        self.HLSSettingsMinMaxEdits = QHBoxLayout() #LAYOUT min-max HSL edits
+        self.LabelMinHue = QLabel("min H")
+        self.LabelMaxHue = QLabel("max H")
+        self.MinHueEdit = QLineEdit("0")
+        self.MaxHueEdit = QLineEdit("0")
+        
+        self.LabelMinSaturation = QLabel("min S")
+        self.LabelMaxSaturation = QLabel("max S")
+        self.MinSaturationEdit = QLineEdit("0")
+        self.MaxSaturationEdit = QLineEdit("0")
+        
+        self.LabelMinLightness = QLabel("min L")
+        self.LabelMaxLightness = QLabel("max L")
+        self.MinLightnessEdit = QLineEdit("0")
+        self.MaxLightnessEdit = QLineEdit("0")
+        
         # Create a button
         self.button = QPushButton('Change Color', self)
         self.button.clicked.connect(self.change_color)
@@ -89,26 +170,33 @@ class ColoredRectangleWidget(QWidget):
         self.button2.clicked.connect(self.change_color_random)
         self.buttonLeftSelect = QPushButton('Select LEFT')
         self.buttonRightSelect = QPushButton('Select RIGHT')
-
+        self.buttonApplyColorGeneratingConfig = QPushButton('Apply color config')
+        
         self.left_arrow_shortcut = QShortcut(QKeySequence(Key_Left), self)
         self.right_arrow_shortcut = QShortcut(QKeySequence(Key_Right), self)
         self.left_arrow_shortcut.activated.connect(self.left_arrow_pressed)
         self.right_arrow_shortcut.activated.connect(self.right_arrow_pressed)
         
         # Add the button to the layout
-        layoutButtons.addWidget(self.button)
-        layoutButtons.addWidget(self.button2)
-        layoutButtons.addWidget(self.buttonLeftSelect)
-        layoutButtons.addWidget(self.buttonRightSelect)
-        self.buttonsPane.setLayout(layoutButtons)
+        #layoutButtonsA.addWidget(self.button)
+        layoutButtonsA.addWidget(self.button2)
+        layoutButtonsA.addWidget(self.buttonLeftSelect)
+        layoutButtonsA.addWidget(self.buttonRightSelect)
+        self.buttonsPaneA.setLayout(layoutConfigsA)
 
+        
+        
+        layoutButtonsB.addWidget(self.buttonApplyColorGeneratingConfig)
         layoutRects.addWidget(self.rectLeft)
         layoutRects.addWidget(self.rectRight)
         #layoutRects.addWidget(self.rectLeft)
     
         self.rectsWidget.setLayout(layoutRects)
         layoutBig.addWidget(self.rectsWidget) # VBox
-        layoutBig.addWidget(self.buttonsPane) # VBox
+        layoutBig.addWidget(self.buttonsPaneA) # VBox
+        layoutBig.addWidget(self.buttonsPaneB) # VBox
+        layoutBig.addWidget(self.buttonsPaneB) # VBox
+        
         self.setLayout(layoutBig)
 
         self.change_color_random()
