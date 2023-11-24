@@ -9,7 +9,13 @@ class ColoredRectangleWidget(QWidget):
     def __init__(self):
         super().__init__()
 
+
+
         self.games = []
+        self.last_R_lightness = 0
+        self.last_L_lightness = 0
+        self.last_selected_rect = ""
+        self.last_selection_result = False
         # game element: dict : timestamp_shown, timestamp_solved, time_delta, RGB_L, RGB_R, L_L, L_R, result, deltaLightnessLminusR, info STRING (for game configuration data).
 
         self.color = QColor(255, 0, 0)  # Initial color is red
@@ -66,8 +72,30 @@ class ColoredRectangleWidget(QWidget):
         self.check_select_result()
 
     def check_select_result(self):
+        if self.last_selected_rect == "R":
+            if self.last_R_lightness >= self.last_L_lightness:
+                self.last_selection_result = True
+            if self.last_R_lightness < self.last_L_lightness:
+                self.last_selection_result = False
+        if self.last_selected_rect == "L":
+            if self.last_L_lightness >= self.last_R_lightness:
+                self.last_selection_result = True
+            if self.last_L_lightness < self.last_R_lightness:
+                self.last_selection_result = False
         
-
+        self.games[-1]["selected_rect"] = self.last_selected_rect
+        self.games[-1]["time_solved"] = time.time()
+        self.games[-1]["spent"] = self.games[-1]["time_solved"] - self.games[-1]["time_shown"]
+        self.games[-1]["result"] = { True:"Win", False:"Loss" }[self.last_selection_result]
+        self.games[-1]["delta lightness abs"] = abs(self.games[-1]["L lightness"] - self.games[-1]["R lightness"])
+        
+        #self.games[-1]["solution_time"] = self.games[-1]
+        with open("games_log.txt", "a+") as fout:
+            msg = str([str(k) + "=" + str(v) for k,v in self.games[-1].items()])[1:-1]
+            fout.writelines([msg,])
+                            
+        self.change_color_random()
+        
     def generate_random_color(self):
         return QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
@@ -153,8 +181,13 @@ class ColoredRectangleWidget(QWidget):
         print(f"{colorL.lightness()=}    {colorR.lightness()=}")
         self.last_R_lightness = L_R
         self.last_L_lightness = L_L
-
         self.update()
+        self.games.append({"time_shown":time.time()})
+        self.games[-1]["L RGB"] = (colorL.red(), colorL.green(),colorL.blue())
+        self.games[-1]["R RGB"] = (colorR.red(), colorR.green(),colorR.blue())
+        self.games[-1]["L lightness"] = 255.0*L_L
+        self.games[-1]["R lightness"] = 255.0*L_R
+
     
     def paintEvent(self, event):
         # Paint the colored rectangle
