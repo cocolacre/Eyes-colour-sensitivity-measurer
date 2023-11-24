@@ -11,6 +11,8 @@ from PyQt6.QtCore import QObject
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimedia import QSoundEffect
 
+from configs import *
+
 Key_Left = Qt.Key.Key_Left
 Key_Right = Qt.Key.Key_Right
 
@@ -67,6 +69,8 @@ class ColoredRectangleWidget(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.last_config_name = config["last_config_name"]
+        self.config = config["configs"][self.last_config_name]
         self.sound = Sound()
 
         self.games = []
@@ -113,17 +117,18 @@ class ColoredRectangleWidget(QWidget):
         self.LabelMinDeltaRed = QLabel("min delta R")
         self.LabelMinDeltaGreen = QLabel("min delta G")
         self.LabelMinDeltaBlue = QLabel("min delta B")
-        self.MinDeltaRedEdit = QLineEdit("0")
-        self.MinDeltaGreenEdit = QLineEdit("0")
-        self.MinDeltaBlueEdit = QLineEdit("0")
+        #self.MinDeltaRedEdit = QLineEdit("0")
+        self.MinDeltaRedEdit = QLineEdit(self.config["min_delta_R"])
+        self.MinDeltaGreenEdit = QLineEdit(self.config["min_delta_G"])
+        self.MinDeltaBlueEdit = QLineEdit(self.config["min_delta_B"])
         
 
         self.LabelMaxDeltaRed = QLabel("max delta R")
         self.LabelMaxDeltaGreen = QLabel("max delta G")
         self.LabelMaxDeltaBlue = QLabel("max delta B")
-        self.MaxDeltaRedEdit = QLineEdit("30")
-        self.MaxDeltaGreenEdit = QLineEdit("30")
-        self.MaxDeltaBlueEdit = QLineEdit("30")
+        self.MaxDeltaRedEdit = QLineEdit(self.config["max_delta_R"])
+        self.MaxDeltaGreenEdit = QLineEdit(self.config["max_delta_G"])
+        self.MaxDeltaBlueEdit = QLineEdit(self.config["max_delta_B"])
 
         self.RGBSettingsLabels.addWidget(self.LabelMinDeltaRed)
         self.RGBSettingsLabels.addWidget(self.LabelMaxDeltaRed)
@@ -148,16 +153,16 @@ class ColoredRectangleWidget(QWidget):
         self.LabelMinDeltaHue = QLabel("min delta H")
         self.LabelMinDeltaSaturation = QLabel("min delta S")
         self.LabelMinDeltaLightness = QLabel("min delta L")
-        self.MinDeltaHueEdit = QLineEdit("0")
-        self.MinDeltaSaturationEdit = QLineEdit("0")
-        self.MinDeltaLightnessEdit = QLineEdit("0")
+        self.MinDeltaHueEdit = QLineEdit(self.config["min_delta_h"])
+        self.MinDeltaSaturationEdit = QLineEdit(self.config["min_delta_s"])
+        self.MinDeltaLightnessEdit = QLineEdit(self.config["min_delta_l"])
         
         self.LabelMaxDeltaHue = QLabel("max delta H")
         self.LabelMaxDeltaSaturation = QLabel("max delta S")
         self.LabelMaxDeltaLightness = QLabel("max delta L")
-        self.MaxDeltaHueEdit = QLineEdit("30")
-        self.MaxDeltaSaturationEdit = QLineEdit("30")
-        self.MaxDeltaLightnessEdit = QLineEdit("30")
+        self.MaxDeltaHueEdit = QLineEdit(self.config["max_delta_h"])
+        self.MaxDeltaSaturationEdit = QLineEdit(self.config["max_delta_s"])
+        self.MaxDeltaLightnessEdit = QLineEdit(self.config["max_delta_l"])
         
         self.HSLSettingsDeltasLabels.addWidget(self.LabelMinDeltaHue)
         self.HSLSettingsDeltasLabels.addWidget(self.LabelMaxDeltaHue)
@@ -180,18 +185,18 @@ class ColoredRectangleWidget(QWidget):
         self.HSLSettingsMinMaxEdits = QHBoxLayout() #LAYOUT min-max HSL edits
         self.LabelMinHue = QLabel("min H")
         self.LabelMaxHue = QLabel("max H")
-        self.MinHueEdit = QLineEdit("0") #TODO: derive min HUE from RGB!
-        self.MaxHueEdit = QLineEdit("321") #TODO: derive max HUE from RGB!
+        self.MinHueEdit = QLineEdit(self.config["min_h"]) #TODO: derive min HUE from RGB!
+        self.MaxHueEdit = QLineEdit(self.config["max_h"]) #TODO: derive max HUE from RGB!
         
         self.LabelMinSaturation = QLabel("min S")
         self.LabelMaxSaturation = QLabel("max S")
-        self.MinSaturationEdit = QLineEdit("0") #TODO: derive min SAT from RGB!
-        self.MaxSaturationEdit = QLineEdit("228") #TODO: derive max SAT from RGB!
+        self.MinSaturationEdit = QLineEdit(self.config["min_s"]) #TODO: derive min SAT from RGB!
+        self.MaxSaturationEdit = QLineEdit(self.config["max_s"]) #TODO: derive max SAT from RGB!
         
         self.LabelMinLightness = QLabel("min L")
         self.LabelMaxLightness = QLabel("max L")
-        self.MinLightnessEdit = QLineEdit("0") #TODO: derive min LIGHTNESS from RGB!
-        self.MaxLightnessEdit = QLineEdit("255") #TODO: derive max LIGHTNESS from RGB!
+        self.MinLightnessEdit = QLineEdit(self.config["min_l"]) #TODO: derive min LIGHTNESS from RGB!
+        self.MaxLightnessEdit = QLineEdit(self.config["max_l"]) #TODO: derive max LIGHTNESS from RGB!
         
         self.HSLSettingsMinMaxLabels.addWidget(self.LabelMinHue)
         self.HSLSettingsMinMaxLabels.addWidget(self.LabelMaxHue)
@@ -294,30 +299,36 @@ class ColoredRectangleWidget(QWidget):
         return QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def generate_two_slightly_different_random_colors(self):
-        color1 =  QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        color1R =  random.randint(0, 255)
-        color1G =  random.randint(0, 255)
-        color1B =  random.randint(0, 255)
+        #color1 =  QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        color1R =  random.randint(int(self.config["min_red"]), int(self.config["max_red"]))
+        #color1G =  random.randint(0, 255)
+        color1G =  random.randint(int(self.config["min_green"]), int(self.config["max_green"]))
+        #color1B =  random.randint(0, 255)
+        color1B =  random.randint(int(self.config["min_blue"]), int(self.config["max_blue"]))
         
-        delta_MAX = 64
-        delta = random.randint(0,delta_MAX)
-        deltaR = random.randint(0,delta)
-        delta = random.randint(0,delta_MAX)
-        deltaG = random.randint(0,delta)
-        delta = random.randint(0,delta_MAX)
-        deltaB = random.randint(0,delta)
+        #delta_MAX = self.config["min_h"]
+        #delta = random.randint(0,delta_MAX)
+        deltaR = random.randint(int(self.config["min_delta_R"]), int(self.config["max_delta_R"]))
+        #delta = random.randint(0, delta_MAX)
+        #deltaG = random.randint(0, delta)
+        deltaG = random.randint(int(self.config["min_delta_G"]), int(self.config["max_delta_G"]))
+        #delta = random.randint(0, delta_MAX)
+        #deltaB = random.randint(0, delta)
+        deltaB = random.randint(int(self.config["min_delta_B"]), int(self.config["max_delta_B"]))
 
-        if color1R + deltaR > 255:
+        if color1R + deltaR > int(self.config["max_red"]):
             color2R = color1R - deltaR
         else:
             color2R = color1R + deltaR
 
-        if color1G + deltaG > 255:
+        #if color1G + deltaG > 255:
+        if color1G + deltaG > int(self.config["max_green"]):
             color2G = color1G - deltaG
         else:
             color2G = color1G + deltaG
 
-        if color1B + deltaB > 255:
+        #if color1B + deltaB > 255:
+        if color1B + deltaB > int(self.config["max_blue"]):
             color2B = color1B - deltaB
         else:
             color2B = color1B + deltaB
@@ -338,11 +349,11 @@ class ColoredRectangleWidget(QWidget):
 
     def change_color_random(self):
         # Change the color of the rectangle to a random color
-        rni = random.randint
-        self.color = QColor(rni(0,255), rni(0,255), rni(0,255))  # You can modify this line to generate a random color
-        self.colorR = QColor(rni(0,255), rni(0,255), rni(0,255))  # You can modify this line to generate a random color
+        #rni = random.randint
+        #self.color = QColor(rni(0,255), rni(0,255), rni(0,255))  # You can modify this line to generate a random color
+        #self.colorR = QColor(rni(0,255), rni(0,255), rni(0,255))  # You can modify this line to generate a random color
         #self.colorR = QColor(0, 255, 0)  # You can modify this line to generate a random color
-        self.colorL = QColor(rni(0,255), rni(0,255), rni(0,255))  # You can modify this line to generate a random color
+        #self.colorL = QColor(rni(0,255), rni(0,255), rni(0,255))  # You can modify this line to generate a random color
         #self.colorL = QColor(0, 0, 255)  # You can modify this line to generate a random color
 
         # Trigger a repaint
