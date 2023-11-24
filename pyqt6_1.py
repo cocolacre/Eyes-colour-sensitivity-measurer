@@ -9,6 +9,9 @@ class ColoredRectangleWidget(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.games = []
+        # game element: dict : timestamp_shown, timestamp_solved, time_delta, RGB_L, RGB_R, L_L, L_R, result, deltaLightnessLminusR, info STRING (for game configuration data).
+
         self.color = QColor(255, 0, 0)  # Initial color is red
         self.colorR = QColor(255, 255, 0)  # 
         self.colorL = QColor(255, 0, 255)  # 
@@ -18,7 +21,7 @@ class ColoredRectangleWidget(QWidget):
         self.rectLeft = QWidget()
         self.rectRight = QWidget()
         
-        self.rectsSize = QSize(300, 300)
+        self.rectsSize = QSize(375, 375)
         self.rectLeft.setFixedSize(self.rectsSize)
         self.rectRight.setFixedSize(self.rectsSize)
         # Create a layout
@@ -32,7 +35,14 @@ class ColoredRectangleWidget(QWidget):
         self.button.clicked.connect(self.change_color)
         self.button2 = QPushButton('Change Color Randomly', self)
         self.button2.clicked.connect(self.change_color_random)
+        self.buttonLeftSelect = QPushButton('Select LEFT')
+        self.buttonRightSelect = QPushButton('Select RIGHT')
 
+        self.left_arrow_shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
+        self.right_arrow_shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
+        self.left_arrow_shortcut.activated.connect(self.left_arrow_pressed)
+        self.right_arrow_shortcut.activated.connect(self.right_arrow_pressed)
+        
         # Add the button to the layout
         layoutButtons.addWidget(self.button)
         layoutButtons.addWidget(self.button2)
@@ -47,6 +57,16 @@ class ColoredRectangleWidget(QWidget):
         layoutBig.addWidget(self.buttonsPane) # VBox
         self.setLayout(layoutBig)
 
+    def right_arrow_pressed(self):
+        self.last_selected_rect = "R"
+        self.check_select_result()
+
+    def left_arrow_pressed(self):
+        self.last_selected_rect = "L"
+        self.check_select_result()
+
+    def check_select_result(self):
+        
 
     def generate_random_color(self):
         return QColor(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
@@ -113,6 +133,27 @@ class ColoredRectangleWidget(QWidget):
         print(f"{colorL.lightness()=}    {colorR.lightness()=}")
         print(f"{colorL.hue()=}    {colorR.hue()=}")
         print(f"{colorL.saturation()=}    {colorR.saturation()=}")
+        c_L_R_norm = colorL.red() / 255.0
+        c_L_G_norm = colorL.green() / 255.0
+        c_L_B_norm = colorL.blue() / 255.0
+
+        c_R_R_norm = colorR.red() / 255.0
+        c_R_G_norm = colorR.green() / 255.0
+        c_R_B_norm = colorR.blue() / 255.0
+
+        c_min_L = min(c_L_R_norm, c_L_G_norm, c_L_B_norm)
+        c_min_R = min(c_R_R_norm, c_R_G_norm, c_R_B_norm)
+        c_max_L = max(c_L_R_norm, c_L_G_norm, c_L_B_norm)
+        c_max_R = max(c_R_R_norm, c_R_G_norm, c_R_B_norm)
+        
+        L_R = (c_min_R + c_max_R) / 2.0 #lightness RIGHT
+        L_L = (c_min_L + c_max_L) / 2.0 #lightness LEFT
+        print(f"{L_L=}    {L_R=}")
+        print(f"{255.0*L_L=}    {255.0*L_R=}")
+        print(f"{colorL.lightness()=}    {colorR.lightness()=}")
+        self.last_R_lightness = L_R
+        self.last_L_lightness = L_L
+
         self.update()
     
     def paintEvent(self, event):
