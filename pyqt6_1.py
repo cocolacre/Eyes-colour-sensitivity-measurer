@@ -1,15 +1,61 @@
-import sys
+import sys, os
+import time
 import random
+from PyQt6.QtCore import QUrl
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt6.QtGui import QPainter, QColor
 from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QKeySequence, QShortcut
+from PyQt6.QtCore import QObject
+#from PyQt6.QtGui import QSound
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt6.QtMultimedia import QSoundEffect
 
+Key_Left = Qt.Key.Key_Left
+Key_Right = Qt.Key.Key_Right
+
+class Sound(QObject):
+    def __init__(self):
+        super(QObject, self).__init__()
+        ###resources_dir = "resources"
+        ###self.sounds_filenames = os.listdir(resources_dir)
+        #self.media_player = QMediaPlayer()
+        self.win_effect = QSoundEffect()
+        self.win_effect.setSource(QUrl.fromLocalFile("resources\\ring.wav"))
+        self.win_effect.setLoopCount(1)
+        self.lose_effect = QSoundEffect()
+        self.lose_effect.setSource(QUrl.fromLocalFile("resources\\damage.wav"))
+        self.lose_effect.setLoopCount(1)
+        
+        #self.audio_output = QAudioOutput()
+        #self.media_player.setAudioOutput(self.audio_output)
+        
+        
+        
+        ###self.qsounds = [QSound(resources_dir+"\\"+sound) for sound in self.sounds_filenames]
+        
+        #self.ring_content = QMediaContent.fromUrl(QUrl.fromLocalFile('resources\\ring.wav'))
+        #self.damage_content = QMediaContent.fromUrl(QUrl.fromLocalFile('resources\\damage.wav'))
+        #self.media_player.setMedia(media_content)
+        ###self.sounds = dict(zip(self.sounds_filenames, self.qsounds))
+        
+    def win(self):
+        ##self.media_player.setMedia(self.ring_content)
+        ###self.sounds['ring.wav'].play()
+        ##self.media_player.play()
+        self.win_effect.play()
+
+    def lose(self):
+        #self.media_player.setMedia(self.damage_content)
+        ###self.sounds['damage.wav'].play()
+        #self.media_player.play()
+        self.lose_effect.play()
 
 class ColoredRectangleWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-
+        self.sound = Sound()
 
         self.games = []
         self.last_R_lightness = 0
@@ -44,14 +90,16 @@ class ColoredRectangleWidget(QWidget):
         self.buttonLeftSelect = QPushButton('Select LEFT')
         self.buttonRightSelect = QPushButton('Select RIGHT')
 
-        self.left_arrow_shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
-        self.right_arrow_shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
+        self.left_arrow_shortcut = QShortcut(QKeySequence(Key_Left), self)
+        self.right_arrow_shortcut = QShortcut(QKeySequence(Key_Right), self)
         self.left_arrow_shortcut.activated.connect(self.left_arrow_pressed)
         self.right_arrow_shortcut.activated.connect(self.right_arrow_pressed)
         
         # Add the button to the layout
         layoutButtons.addWidget(self.button)
         layoutButtons.addWidget(self.button2)
+        layoutButtons.addWidget(self.buttonLeftSelect)
+        layoutButtons.addWidget(self.buttonRightSelect)
         self.buttonsPane.setLayout(layoutButtons)
 
         layoutRects.addWidget(self.rectLeft)
@@ -62,6 +110,8 @@ class ColoredRectangleWidget(QWidget):
         layoutBig.addWidget(self.rectsWidget) # VBox
         layoutBig.addWidget(self.buttonsPane) # VBox
         self.setLayout(layoutBig)
+
+        self.change_color_random()
 
     def right_arrow_pressed(self):
         self.last_selected_rect = "R"
@@ -75,14 +125,18 @@ class ColoredRectangleWidget(QWidget):
         if self.last_selected_rect == "R":
             if self.last_R_lightness >= self.last_L_lightness:
                 self.last_selection_result = True
+                self.sound.win()
             if self.last_R_lightness < self.last_L_lightness:
+                self.sound.lose()
                 self.last_selection_result = False
         if self.last_selected_rect == "L":
             if self.last_L_lightness >= self.last_R_lightness:
                 self.last_selection_result = True
+                self.sound.win()
             if self.last_L_lightness < self.last_R_lightness:
+                self.sound.lose()
                 self.last_selection_result = False
-        
+
         self.games[-1]["selected_rect"] = self.last_selected_rect
         self.games[-1]["time_solved"] = time.time()
         self.games[-1]["spent"] = self.games[-1]["time_solved"] - self.games[-1]["time_shown"]
@@ -92,7 +146,7 @@ class ColoredRectangleWidget(QWidget):
         #self.games[-1]["solution_time"] = self.games[-1]
         with open("games_log.txt", "a+") as fout:
             msg = str([str(k) + "=" + str(v) for k,v in self.games[-1].items()])[1:-1]
-            fout.writelines([msg,])
+            fout.write(msg + "\n")
                             
         self.change_color_random()
         
