@@ -14,6 +14,18 @@ from PyQt6.QtMultimedia import QSoundEffect
 Key_Left = Qt.Key.Key_Left
 Key_Right = Qt.Key.Key_Right
 
+
+def encode_config(config_filename):
+    """
+    Parse config file to strings\dict, encode as single short string, return this encoded string.
+    """
+    # (min)R,G,B,(max)R,G,B,(minDelta)R,G,B,(maxDelta)R,G,B,(min)H,S,L,(max)H,S,L,(minDelta)H,S,L,(maxDelta)H,S,L
+    return f"0,0,0,255,255,255,0,0,0,30,30,30,0,0,0,255,255,255,0,0,0,30,30,30"
+    pass
+
+def encode_config(config_filename):
+    pass
+
 class Sound(QObject):
     def __init__(self):
         super(QObject, self).__init__()
