@@ -2,7 +2,7 @@ import sys, os
 import time
 import random
 from PyQt6.QtCore import QUrl
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt6.QtWidgets import QApplication, QWidget, QLineEdit, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt6.QtGui import QPainter, QColor
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QKeySequence, QShortcut
@@ -77,7 +77,7 @@ class ColoredRectangleWidget(QWidget):
         self.rectLeft = QWidget()
         self.rectRight = QWidget()
         
-        self.rectsSize = QSize(375, 375)
+        self.rectsSize = QSize(400, 300)
         self.rectLeft.setFixedSize(self.rectsSize)
         self.rectRight.setFixedSize(self.rectsSize)
         # Create a layout
@@ -87,7 +87,7 @@ class ColoredRectangleWidget(QWidget):
         layoutButtonsMain = QVBoxLayout()
         layoutButtonsA = QHBoxLayout()
         layoutButtonsB = QHBoxLayout()
-        layoutConfigsA = QHBoxLayout()
+        layoutConfigsA = QVBoxLayout()
     
     
         #labels
@@ -105,12 +105,13 @@ class ColoredRectangleWidget(QWidget):
         self.MinDeltaGreenEdit = QLineEdit("0")
         self.MinDeltaBlueEdit = QLineEdit("0")
         
+
         self.LabelMaxDeltaRed = QLabel("max delta R")
         self.LabelMaxDeltaGreen = QLabel("max delta G")
         self.LabelMaxDeltaBlue = QLabel("max delta B")
-        self.MaxDeltaRedEdit = QLineEdit("0")
-        self.MaxDeltaGreenEdit = QLineEdit("0")
-        self.MaxDeltaBlueEdit = QLineEdit("0")
+        self.MaxDeltaRedEdit = QLineEdit("30")
+        self.MaxDeltaGreenEdit = QLineEdit("30")
+        self.MaxDeltaBlueEdit = QLineEdit("30")
 
         self.RGBSettingsLabels.addWidget(self.LabelMinDeltaRed)
         self.RGBSettingsLabels.addWidget(self.LabelMaxDeltaRed)
@@ -126,42 +127,80 @@ class ColoredRectangleWidget(QWidget):
         self.RGBSettingsEdits.addWidget(self.MinDeltaBlueEdit)
         self.RGBSettingsEdits.addWidget(self.MaxDeltaBlueEdit)
 
+        layoutConfigsA.addLayout(self.RGBSettingsLabels)
+        layoutConfigsA.addLayout(self.RGBSettingsEdits)
 
         
-        
-        self.HLSSettingsDeltasLabels = QHBoxLayout() #LAYOUT HSL deltas labels
-        self.HLSSettingsDeltasEdits = QHBoxLayout() #LAYOUT HSL deltas edits
+        self.HSLSettingsDeltasLabels = QHBoxLayout() #LAYOUT HSL deltas labels
+        self.HSLSettingsDeltasEdits = QHBoxLayout() #LAYOUT HSL deltas edits
         self.LabelMinDeltaHue = QLabel("min delta H")
-        self.LabelMinDeltaLightness = QLabel("min delta L")
         self.LabelMinDeltaSaturation = QLabel("min delta S")
+        self.LabelMinDeltaLightness = QLabel("min delta L")
         self.MinDeltaHueEdit = QLineEdit("0")
-        self.MinDeltaLightnessEdit = QLineEdit("0")
         self.MinDeltaSaturationEdit = QLineEdit("0")
+        self.MinDeltaLightnessEdit = QLineEdit("0")
         
         self.LabelMaxDeltaHue = QLabel("max delta H")
         self.LabelMaxDeltaSaturation = QLabel("max delta S")
         self.LabelMaxDeltaLightness = QLabel("max delta L")
-        self.MaxDeltaHueEdit = QLineEdit("0")
-        self.MaxDeltaSaturationEdit = QLineEdit("0")
-        self.MaxDeltaLightnessEdit = QLineEdit("0")
+        self.MaxDeltaHueEdit = QLineEdit("30")
+        self.MaxDeltaSaturationEdit = QLineEdit("30")
+        self.MaxDeltaLightnessEdit = QLineEdit("30")
         
+        self.HSLSettingsDeltasLabels.addWidget(self.LabelMinDeltaHue)
+        self.HSLSettingsDeltasLabels.addWidget(self.LabelMaxDeltaHue)
+        self.HSLSettingsDeltasLabels.addWidget(self.LabelMinDeltaSaturation)
+        self.HSLSettingsDeltasLabels.addWidget(self.LabelMaxDeltaSaturation)
+        self.HSLSettingsDeltasLabels.addWidget(self.LabelMinDeltaLightness)
+        self.HSLSettingsDeltasLabels.addWidget(self.LabelMaxDeltaLightness)
+        
+        self.HSLSettingsDeltasEdits.addWidget(self.MinDeltaHueEdit)
+        self.HSLSettingsDeltasEdits.addWidget(self.MaxDeltaHueEdit)
+        self.HSLSettingsDeltasEdits.addWidget(self.MinDeltaSaturationEdit)
+        self.HSLSettingsDeltasEdits.addWidget(self.MaxDeltaSaturationEdit)
+        self.HSLSettingsDeltasEdits.addWidget(self.MinDeltaLightnessEdit)
+        self.HSLSettingsDeltasEdits.addWidget(self.MaxDeltaLightnessEdit)
 
-        self.HLSSettingsMinMaxLabels = QHBoxLayout() #LAYOUT min-max HSL labels
-        self.HLSSettingsMinMaxEdits = QHBoxLayout() #LAYOUT min-max HSL edits
+        layoutConfigsA.addLayout(self.HSLSettingsDeltasLabels)
+        layoutConfigsA.addLayout(self.HSLSettingsDeltasEdits)
+        
+        self.HSLSettingsMinMaxLabels = QHBoxLayout() #LAYOUT min-max HSL labels
+        self.HSLSettingsMinMaxEdits = QHBoxLayout() #LAYOUT min-max HSL edits
         self.LabelMinHue = QLabel("min H")
         self.LabelMaxHue = QLabel("max H")
-        self.MinHueEdit = QLineEdit("0")
-        self.MaxHueEdit = QLineEdit("0")
+        self.MinHueEdit = QLineEdit("0") #TODO: derive min HUE from RGB!
+        self.MaxHueEdit = QLineEdit("321") #TODO: derive max HUE from RGB!
         
         self.LabelMinSaturation = QLabel("min S")
         self.LabelMaxSaturation = QLabel("max S")
-        self.MinSaturationEdit = QLineEdit("0")
-        self.MaxSaturationEdit = QLineEdit("0")
+        self.MinSaturationEdit = QLineEdit("0") #TODO: derive min SAT from RGB!
+        self.MaxSaturationEdit = QLineEdit("228") #TODO: derive max SAT from RGB!
         
         self.LabelMinLightness = QLabel("min L")
         self.LabelMaxLightness = QLabel("max L")
-        self.MinLightnessEdit = QLineEdit("0")
-        self.MaxLightnessEdit = QLineEdit("0")
+        self.MinLightnessEdit = QLineEdit("0") #TODO: derive min LIGHTNESS from RGB!
+        self.MaxLightnessEdit = QLineEdit("255") #TODO: derive max LIGHTNESS from RGB!
+        
+        self.HSLSettingsMinMaxLabels.addWidget(self.LabelMinHue)
+        self.HSLSettingsMinMaxLabels.addWidget(self.LabelMaxHue)
+        self.HSLSettingsMinMaxLabels.addWidget(self.LabelMinSaturation)
+        self.HSLSettingsMinMaxLabels.addWidget(self.LabelMaxSaturation)
+        self.HSLSettingsMinMaxLabels.addWidget(self.LabelMinLightness)
+        self.HSLSettingsMinMaxLabels.addWidget(self.LabelMaxLightness)
+        
+        self.HSLSettingsMinMaxEdits.addWidget(self.MinHueEdit)
+        self.HSLSettingsMinMaxEdits.addWidget(self.MaxHueEdit)
+        self.HSLSettingsMinMaxEdits.addWidget(self.MinSaturationEdit)
+        self.HSLSettingsMinMaxEdits.addWidget(self.MaxSaturationEdit)
+        self.HSLSettingsMinMaxEdits.addWidget(self.MinLightnessEdit)
+        self.HSLSettingsMinMaxEdits.addWidget(self.MaxLightnessEdit)
+        
+        layoutConfigsA.addLayout(self.HSLSettingsMinMaxLabels)
+        layoutConfigsA.addLayout(self.HSLSettingsMinMaxEdits)
+        
+        self.ConfigsAWidget = QWidget()
+        self.ConfigsAWidget.setLayout(layoutConfigsA)
+        
         
         # Create a button
         self.button = QPushButton('Change Color', self)
@@ -182,11 +221,11 @@ class ColoredRectangleWidget(QWidget):
         layoutButtonsA.addWidget(self.button2)
         layoutButtonsA.addWidget(self.buttonLeftSelect)
         layoutButtonsA.addWidget(self.buttonRightSelect)
-        self.buttonsPaneA.setLayout(layoutConfigsA)
+        self.buttonsPaneA.setLayout(layoutButtonsA)
 
         
         
-        layoutButtonsB.addWidget(self.buttonApplyColorGeneratingConfig)
+        #layoutButtonsB.addWidget(self.buttonApplyColorGeneratingConfig)
         layoutRects.addWidget(self.rectLeft)
         layoutRects.addWidget(self.rectRight)
         #layoutRects.addWidget(self.rectLeft)
@@ -194,7 +233,8 @@ class ColoredRectangleWidget(QWidget):
         self.rectsWidget.setLayout(layoutRects)
         layoutBig.addWidget(self.rectsWidget) # VBox
         layoutBig.addWidget(self.buttonsPaneA) # VBox
-        layoutBig.addWidget(self.buttonsPaneB) # VBox
+        layoutBig.addWidget(self.ConfigsAWidget)
+        
         layoutBig.addWidget(self.buttonsPaneB) # VBox
         
         self.setLayout(layoutBig)
